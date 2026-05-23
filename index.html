@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stock General SAP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0a0d14;
+      --surface: #111620;
+      --surface2: #161c2a;
+      --border: rgba(255,255,255,0.07);
+      --text: #e8edf5;
+      --text-muted: #5a6480;
+      --accent: #3b82f6;
+      --accent2: #06b6d4;
+      --green: #10b981;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --purple: #8b5cf6;
+      --font: 'DM Sans', sans-serif;
+      --mono: 'DM Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -40%;
+      left: -20%;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%);
+      pointer-events: none;
+      animation: pulse-bg 8s ease-in-out infinite alternate;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -30%;
+      right: -10%;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 70%);
+      pointer-events: none;
+      animation: pulse-bg 10s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes pulse-bg {
+      from { transform: scale(1); opacity: 0.6; }
+      to { transform: scale(1.2); opacity: 1; }
+    }
+
+    .layout {
+      max-width: 1700px;
+      margin: auto;
+      padding: 36px 32px;
+    }
+
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 28px rgba(59,130,246,0.35);
+    }
+
+    .brand-text h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+
+    .brand-text p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.2);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--green);
+    }
+
+    .live-badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.3);
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(59,130,246,0.4);
+    }
+
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 18px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+      background: var(--surface);
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(59,130,246,0.05);
+    }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-icon { font-size: 32px; margin-bottom: 10px; }
+    .upload-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .upload-sub { font-size: 13px; color: var(--text-muted); }
+
+    .upload-zone.loaded {
+      border-color: var(--green);
+      background: rgba(16,185,129,0.05);
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.12);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+    }
+
+    .kpi-card.blue::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+    .kpi-card.green::before { background: linear-gradient(90deg, var(--green), #34d399); }
+    .kpi-card.purple::before { background: linear-gradient(90deg, var(--purple), #a78bfa); }
+    .kpi-card.amber::before { background: linear-gradient(90deg, var(--amber), #fcd34d); }
+
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 11px 14px 11px 42px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+
+    .search-input::placeholder { color: var(--text-muted); }
+
+    .filter-select {
+      padding: 11px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a6480' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+
+    .filter-select:focus { border-color: var(--accent); }
+
+    .filter-select.active-filter {
+      border-color: var(--accent);
+      background-color: rgba(59,130,246,0.08);
+      color: #93c5fd;
+    }
+
+    .filter-arato.active-filter {
+      border-color: var(--red);
+      background-color: rgba(239,68,68,0.08);
+      color: #fca5a5;
+    }
+
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .table-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .table-count {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .table-count span {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    th {
+      padding: 14px 18px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.2s;
+    }
+
+    th:hover { color: var(--text); }
+
+    th .sort-icon { margin-left: 5px; opacity: 0.4; }
+    th.sort-asc .sort-icon::after { content: ' ↑'; opacity: 1; }
+    th.sort-desc .sort-icon::after { content: ' ↓'; opacity: 1; }
+
+    td {
+      padding: 15px 18px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text);
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover { background: var(--surface2); }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      white-space: nowrap;
+    }
+
+    .badge-centro {
+      background: rgba(59,130,246,0.15);
+      color: #93c5fd;
+      border: 1px solid rgba(59,130,246,0.2);
+    }
+
+    .badge-lote {
+      background: rgba(245,158,11,0.12);
+      color: #fcd34d;
+      border: 1px solid rgba(245,158,11,0.2);
+      font-family: var(--mono);
+    }
+
+    .badge-contratista {
+      background: rgba(139,92,246,0.15);
+      color: #c4b5fd;
+      border: 1px solid rgba(139,92,246,0.2);
+    }
+
+    .badge-arato {
+      background: rgba(239,68,68,0.12);
+      color: #fca5a5;
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+
+    .badge-sin-arato {
+      background: rgba(90,100,128,0.12);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .stock-value {
+      font-family: var(--mono);
+      font-weight: 600;
+      color: var(--green);
+      font-size: 14px;
+    }
+
+    .material-code {
+      font-family: var(--mono);
+      font-weight: 500;
+      font-size: 13px;
+      color: #93c5fd;
+    }
+
+    .valor-cell {
+      font-family: var(--mono);
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .empty-state {
+      padding: 80px 40px;
+      text-align: center;
+    }
+
+    .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .empty-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 22px;
+      border-top: 1px solid var(--border);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .page-info {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .page-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .page-btn {
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .page-btn:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    .page-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.3;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .rows-select {
+      padding: 7px 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      outline: none;
+    }
+
+    .btn-export {
+      background: rgba(16,185,129,0.12);
+      color: #6ee7b7;
+      border: 1px solid rgba(16,185,129,0.2);
+      transition: all 0.2s;
+    }
+
+    .btn-export:hover {
+      background: rgba(16,185,129,0.2);
+      transform: translateY(-1px);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      .layout { padding: 20px 16px; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .toolbar { flex-direction: column; }
+      .search-wrap { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">📦</div>
+        <div class="brand-text">
+          <h1>Stock General SAP</h1>
+          <p>Inventario · Oracle / SAP ERP</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="live-badge">Sistema activo</div>
+        <button class="btn btn-ghost" onclick="cargarStockRemoto()" title="Actualizar stock desde archivo online">
+          ↻ Actualizar stock
+        </button>
+        <button class="btn btn-export" onclick="exportarExcel()" title="Exportar vista filtrada">
+          ⬇ Exportar Excel
+        </button>
+      </div>
+    </div>
+
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="excelFile" accept=".xlsx">
+      <div class="upload-icon">📊</div>
+      <div class="upload-title">Cargar archivo Excel SAP (.xlsx)</div>
+      <div class="upload-sub">Arrastrá el archivo aquí o hacé clic para seleccionarlo</div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card blue">
+        <div class="kpi-label">Materiales</div>
+        <div class="kpi-value" id="kpiMateriales">—</div>
+        <div class="kpi-sub">registros cargados</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Centros</div>
+        <div class="kpi-value" id="kpiCentros">—</div>
+        <div class="kpi-sub">centros activos</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-label">Contratistas</div>
+        <div class="kpi-value" id="kpiContratistas">—</div>
+        <div class="kpi-sub">contratistas</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">Aratos</div>
+        <div class="kpi-value" id="kpiAratos">—</div>
+        <div class="kpi-sub">stocks especiales</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input class="search-input" type="text" id="searchInput" placeholder="Buscar material, contratista, almacén...">
+      </div>
+
+      <select class="filter-select" id="filterCentro">
+        <option value="">Todos los centros</option>
+      </select>
+
+      <select class="filter-select" id="filterContratista">
+        <option value="">Todos los contratistas</option>
+      </select>
+
+      <select class="filter-select" id="filterUnidad">
+        <option value="">Todas las unidades</option>
+      </select>
+
+      <select class="filter-select filter-arato" id="filterArato">
+        <option value="">Todos los ARATOS</option>
+      </select>
+
+      <button class="btn btn-ghost" onclick="limpiarFiltros()">✕ Limpiar</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-meta">
+        <div class="table-count" id="tableCount">
+          Mostrando <span id="countVisible">0</span> de <span id="countTotal">0</span> registros
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:13px;color:var(--text-muted);">Filas por página:</span>
+          <select class="rows-select" id="rowsPerPage" onchange="cambiarPagina(1)">
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+            <option value="9999">Todas</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortTable(0)">Material <span class="sort-icon"></span></th>
+              <th onclick="sortTable(1)" style="min-width:300px;">Descripción <span class="sort-icon"></span></th>
+              <th onclick="sortTable(2)">Centro <span class="sort-icon"></span></th>
+              <th onclick="sortTable(3)">Almacén <span class="sort-icon"></span></th>
+              <th onclick="sortTable(4)">Lote <span class="sort-icon"></span></th>
+              <th onclick="sortTable(5)">Stock <span class="sort-icon"></span></th>
+              <th onclick="sortTable(6)">Unidad <span class="sort-icon"></span></th>
+              <th onclick="sortTable(7)">Contratista <span class="sort-icon"></span></th>
+              <th onclick="sortTable(8)" style="color:#93c5fd;">ARATO / Esp. <span class="sort-icon"></span></th>
+              <th onclick="sortTable(9)">Valor <span class="sort-icon"></span></th>
+              <th onclick="sortTable(10)">Moneda <span class="sort-icon"></span></th>
+              <th>Fecha SAP</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="emptyState" class="empty-state" style="display:none;">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">Sin resultados</div>
+        <div class="empty-sub">Ajustá los filtros o cargá un archivo Excel.</div>
+      </div>
+
+      <div class="pagination" id="pagination" style="display:none;">
+        <div class="page-info" id="pageInfo"></div>
+        <div class="page-controls" id="pageControls"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let allData = [];
+    let filteredData = [];
+    let currentPage = 1;
+    let sortCol = -1;
+    let sortDir = 1;
+
+    // Pegá acá el enlace directo al archivo online cuando lo tengas.
+    // Ejemplo Dropbox: https://www.dropbox.com/s/archivo/stock.xlsx?dl=1
+    const REMOTE_STOCK_URL = '';
+    const AUTO_REFRESH_MINUTES = 5;
+
+    const zone = document.getElementById('uploadZone');
+    zone.addEventListener('dragover', e => {
+      e.preventDefault();
+      zone.classList.add('drag-over');
+    });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) procesarArchivo(file);
+    });
+
+    document.getElementById('excelFile').addEventListener('change', e => {
+      if (e.target.files[0]) procesarArchivo(e.target.files[0]);
+    });
+
+    function procesarArchivo(file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        cargarDatosExcel(e.target.result, file.name);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    async function cargarStockRemoto() {
+      if (!REMOTE_STOCK_URL) {
+        toast('Configurá REMOTE_STOCK_URL con el link del archivo online', 'red');
+        return;
+      }
+
+      try {
+        zone.classList.add('loaded');
+        zone.querySelector('.upload-title').textContent = 'Actualizando stock online...';
+        zone.querySelector('.upload-sub').textContent = 'Leyendo archivo remoto';
+
+        const response = await fetch(REMOTE_STOCK_URL, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const buffer = await response.arrayBuffer();
+        cargarDatosExcel(buffer, 'stock online');
+      } catch (error) {
+        zone.querySelector('.upload-title').textContent = 'No se pudo cargar el stock online';
+        zone.querySelector('.upload-sub').textContent = 'Revisá que el enlace sea público y directo';
+        toast('Error al leer el archivo online', 'red');
+      }
+    }
+
+    function cargarDatosExcel(buffer, sourceName) {
+      const wb = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      allData = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      zone.classList.add('loaded');
+      zone.querySelector('.upload-title').textContent = `✅ ${sourceName} cargado`;
+      zone.querySelector('.upload-sub').textContent = `${allData.length} registros encontrados · ${new Date().toLocaleString('es-AR')}`;
+      generarFiltros(allData);
+      aplicarFiltros();
+      actualizarKPIs(allData);
+      toast(`Stock actualizado: ${allData.length} registros`, 'green');
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+      }[char]));
+    }
+
+    function get(row, names) {
+      const keys = Object.keys(row);
+      for (const n of names) {
+        const k = keys.find(k => k.toLowerCase().trim().includes(n.toLowerCase().trim()));
+        if (k !== undefined) return row[k];
+      }
+      return '';
+    }
+
+    function getRowData(row) {
+      return {
+        material: get(row, ['material']),
+        descripcion: get(row, ['texto breve', 'descripcion']),
+        centro: get(row, ['centro']),
+        almacen: get(row, ['almacén', 'almacen']),
+        lote: get(row, ['lote']),
+        stock: get(row, ['libre utilización', 'libre utilizacion', 'stock']),
+        unidad: get(row, ['umb', 'unidad']),
+        contratista: get(row, ['denominación almacén', 'denominacion almacen', 'contratista']),
+        arato: get(row, ['stock especial', 'arato', 'aratos', 'especial']),
+        valor: get(row, ['valor libre', 'valor']),
+        moneda: get(row, ['moneda']),
+      };
+    }
+
+    function actualizarKPIs(data) {
+      document.getElementById('kpiMateriales').textContent = data.length.toLocaleString('es-AR');
+      document.getElementById('kpiCentros').textContent = new Set(data.map(r => get(r, ['centro'])).filter(Boolean)).size;
+      document.getElementById('kpiContratistas').textContent = new Set(data.map(r => get(r, ['denominación almacén', 'denominacion almacen', 'contratista'])).filter(Boolean)).size;
+      document.getElementById('kpiAratos').textContent = new Set(data.map(r => get(r, ['stock especial','arato','aratos','especial'])).filter(Boolean)).size;
+    }
+
+    function generarFiltros(data) {
+      const centros = [...new Set(data.map(r => get(r, ['centro'])).filter(Boolean))].sort();
+      const contratistas = [...new Set(data.map(r => get(r, ['denominación almacén','denominacion almacen','contratista'])).filter(Boolean))].sort();
+      const unidades = [...new Set(data.map(r => get(r, ['umb','unidad'])).filter(Boolean))].sort();
+      const aratos = [...new Set(data.map(r => get(r, ['stock especial','arato','aratos','especial'])).filter(Boolean))].sort();
+
+      llenarSelect('filterCentro', centros, 'Todos los centros');
+      llenarSelect('filterContratista', contratistas, 'Todos los contratistas');
+      llenarSelect('filterUnidad', unidades, 'Todas las unidades');
+      llenarSelect('filterArato', aratos, 'Todos los ARATOS');
+    }
+
+    function llenarSelect(id, opts, placeholder) {
+      const s = document.getElementById(id);
+      s.innerHTML = `<option value="">${escapeHtml(placeholder)}</option>`;
+      opts.forEach(o => {
+        const option = document.createElement('option');
+        option.value = o;
+        option.textContent = o;
+        s.appendChild(option);
+      });
+    }
+
+    function limpiarFiltros() {
+      document.getElementById('searchInput').value = '';
+      ['filterCentro','filterContratista','filterUnidad','filterArato'].forEach(id => {
+        document.getElementById(id).value = '';
+        document.getElementById(id).classList.remove('active-filter');
+      });
+      aplicarFiltros();
+    }
+
+    function aplicarFiltros() {
+      const txt = document.getElementById('searchInput').value.toLowerCase();
+      const centro = document.getElementById('filterCentro').value;
+      const contratista = document.getElementById('filterContratista').value;
+      const unidad = document.getElementById('filterUnidad').value;
+      const arato = document.getElementById('filterArato').value;
+
+      ['filterCentro','filterContratista','filterUnidad'].forEach(id => {
+        document.getElementById(id).classList.toggle('active-filter', !!document.getElementById(id).value);
+      });
+      document.getElementById('filterArato').classList.toggle('active-filter', !!arato);
+
+      filteredData = allData.filter(row => {
+        const d = getRowData(row);
+        const haystack = Object.values(d).join(' ').toLowerCase();
+        return (!txt || haystack.includes(txt))
+          && (!centro || String(d.centro).includes(centro))
+          && (!contratista || String(d.contratista).includes(contratista))
+          && (!unidad || String(d.unidad).includes(unidad))
+          && (!arato || String(d.arato).includes(arato));
+      });
+
+      currentPage = 1;
+      renderTabla();
+    }
+
+    function sortTable(col) {
+      if (sortCol === col) sortDir *= -1;
+      else {
+        sortCol = col;
+        sortDir = 1;
+      }
+
+      document.querySelectorAll('th').forEach((th, i) => {
+        th.classList.remove('sort-asc','sort-desc');
+        if (i === col) th.classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
+      });
+
+      const keys = ['material','descripcion','centro','almacen','lote','stock','unidad','contratista','arato','valor','moneda'];
+      filteredData.sort((a, b) => {
+        const va = getRowData(a)[keys[col]] ?? '';
+        const vb = getRowData(b)[keys[col]] ?? '';
+        if (!isNaN(va) && !isNaN(vb)) return (Number(va) - Number(vb)) * sortDir;
+        return String(va).localeCompare(String(vb)) * sortDir;
+      });
+
+      currentPage = 1;
+      renderTabla();
+    }
+
+    function renderTabla() {
+      const tbody = document.getElementById('tableBody');
+      const rpp = Number(document.getElementById('rowsPerPage').value);
+      const total = filteredData.length;
+      const totalPg = Math.max(1, Math.ceil(total / rpp));
+      if (currentPage > totalPg) currentPage = totalPg;
+
+      const start = (currentPage - 1) * rpp;
+      const slice = filteredData.slice(start, start + rpp);
+
+      document.getElementById('countVisible').textContent = total.toLocaleString('es-AR');
+      document.getElementById('countTotal').textContent = allData.length.toLocaleString('es-AR');
+
+      if (total === 0) {
+        tbody.innerHTML = '';
+        document.getElementById('emptyState').style.display = 'block';
+        document.getElementById('pagination').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('pagination').style.display = 'flex';
+
+      const today = new Date().toLocaleDateString('es-AR');
+      tbody.innerHTML = slice.map(row => {
+        const d = getRowData(row);
+        const stockNum = parseFloat(String(d.stock).replace(',','.')) || 0;
+        const stockColor = stockNum <= 0 ? 'color:var(--red)' : 'color:var(--green)';
+        const valor = d.valor ? Number(d.valor).toLocaleString('es-AR') : '—';
+
+        return `<tr>
+          <td><span class="material-code">${escapeHtml(d.material)}</span></td>
+          <td style="white-space:normal;min-width:280px;color:#cbd5e1;">${escapeHtml(d.descripcion)}</td>
+          <td><span class="badge badge-centro">${escapeHtml(d.centro)}</span></td>
+          <td style="color:#94a3b8;">${escapeHtml(d.almacen)}</td>
+          <td><span class="badge badge-lote">${escapeHtml(d.lote || '—')}</span></td>
+          <td><span class="stock-value" style="${stockColor}">${escapeHtml(d.stock)}</span></td>
+          <td style="color:var(--text-muted);font-size:12px;font-weight:600;">${escapeHtml(d.unidad)}</td>
+          <td><span class="badge badge-contratista">${escapeHtml(d.contratista)}</span></td>
+          <td><span class="badge ${d.arato ? 'badge-arato' : 'badge-sin-arato'}">${escapeHtml(d.arato || 'SIN ARATO')}</span></td>
+          <td><span class="valor-cell">${escapeHtml(valor)}</span></td>
+          <td style="color:var(--text-muted);font-size:12px;">${escapeHtml(d.moneda)}</td>
+          <td style="color:var(--text-muted);font-size:12px;font-family:var(--mono);">${escapeHtml(today)}</td>
+        </tr>`;
+      }).join('');
+
+      renderPaginacion(total, rpp, totalPg);
+    }
+
+    function renderPaginacion(total, rpp, totalPg) {
+      const pg = document.getElementById('pageInfo');
+      const ctrl = document.getElementById('pageControls');
+      const start = (currentPage - 1) * rpp + 1;
+      const end = Math.min(currentPage * rpp, total);
+
+      pg.textContent = `${start}–${end} de ${total.toLocaleString('es-AR')}`;
+
+      let pages = [];
+      pages.push(`<button class="page-btn" onclick="cambiarPagina(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`);
+
+      for (let i = 1; i <= totalPg; i++) {
+        if (i === 1 || i === totalPg || Math.abs(i - currentPage) <= 1) {
+          pages.push(`<button class="page-btn ${i===currentPage?'active':''}" onclick="cambiarPagina(${i})">${i}</button>`);
+        } else if (Math.abs(i - currentPage) === 2) {
+          pages.push(`<span style="color:var(--text-muted);padding:0 4px;">…</span>`);
+        }
+      }
+
+      pages.push(`<button class="page-btn" onclick="cambiarPagina(${currentPage+1})" ${currentPage===totalPg?'disabled':''}>›</button>`);
+      ctrl.innerHTML = pages.join('');
+    }
+
+    function cambiarPagina(n) {
+      const rpp = Number(document.getElementById('rowsPerPage').value);
+      const max = Math.ceil(filteredData.length / rpp);
+      if (n < 1 || n > max) return;
+      currentPage = n;
+      renderTabla();
+      document.querySelector('.table-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function exportarExcel() {
+      if (!filteredData.length) {
+        toast('No hay datos para exportar', 'red');
+        return;
+      }
+      const rows = filteredData.map(row => {
+        const d = getRowData(row);
+        return {
+          'Material': d.material,
+          'Descripción': d.descripcion,
+          'Centro': d.centro,
+          'Almacén': d.almacen,
+          'Lote': d.lote,
+          'Stock': d.stock,
+          'Unidad': d.unidad,
+          'Contratista': d.contratista,
+          'ARATO': d.arato || 'SIN ARATO',
+          'Valor': d.valor,
+          'Moneda': d.moneda,
+        };
+      });
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Stock');
+      XLSX.writeFile(wb, `stock_sap_${new Date().toISOString().slice(0,10)}.xlsx`);
+      toast(`Exportado: ${filteredData.length} registros`, 'green');
+    }
+
+    function toast(msg, type = 'green') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.borderLeftColor = type === 'red' ? 'var(--red)' : 'var(--green)';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    document.getElementById('searchInput').addEventListener('input', aplicarFiltros);
+    ['filterCentro','filterContratista','filterUnidad','filterArato'].forEach(id =>
+      document.getElementById(id).addEventListener('change', aplicarFiltros)
+    );
+
+    renderTabla();
+
+    if (REMOTE_STOCK_URL) {
+      cargarStockRemoto();
+      setInterval(cargarStockRemoto, AUTO_REFRESH_MINUTES * 60 * 1000);
+    }
+  </script>
+</body>
+</html>
