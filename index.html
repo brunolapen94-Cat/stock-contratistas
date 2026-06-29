@@ -9,11 +9,11 @@
     :root {
       --bg: #0a0d14;
       --surface: #111620;
-      --surface-2: #161d2b;
-      --surface-3: #1b2434;
+      --surface2: #161c2a;
+      --surface3: #1d2636;
       --border: rgba(255,255,255,.08);
       --text: #e8edf5;
-      --muted: #8993a8;
+      --muted: #91a0bd;
       --blue: #3b82f6;
       --cyan: #06b6d4;
       --green: #10b981;
@@ -29,14 +29,14 @@
       min-height: 100vh;
       font-family: Arial, Helvetica, sans-serif;
       background:
-        radial-gradient(circle at top left, rgba(59,130,246,.12), transparent 36rem),
+        radial-gradient(circle at top left, rgba(59,130,246,.12), transparent 34rem),
         radial-gradient(circle at bottom right, rgba(139,92,246,.10), transparent 34rem),
         var(--bg);
       color: var(--text);
     }
 
     .layout {
-      max-width: 1700px;
+      max-width: 1720px;
       margin: 0 auto;
       padding: 32px;
     }
@@ -63,7 +63,8 @@
       place-items: center;
       border-radius: 14px;
       background: linear-gradient(135deg, var(--blue), var(--cyan));
-      font-size: 25px;
+      font-size: 17px;
+      font-weight: 900;
       box-shadow: 0 0 26px rgba(59,130,246,.32);
     }
 
@@ -140,7 +141,7 @@
     }
 
     .tab-btn {
-      min-width: 148px;
+      min-width: 150px;
       border: 0;
       border-radius: 10px;
       padding: 11px 16px;
@@ -269,6 +270,8 @@
       box-shadow: 0 0 0 3px rgba(59,130,246,.12);
     }
 
+    .hidden { display: none; }
+
     .table-card {
       overflow: hidden;
       border: 1px solid var(--border);
@@ -312,7 +315,7 @@
       position: sticky;
       top: 0;
       z-index: 1;
-      background: var(--surface-2);
+      background: var(--surface2);
       color: var(--muted);
       text-align: left;
       text-transform: uppercase;
@@ -374,18 +377,6 @@
       border-color: rgba(239,68,68,.22);
     }
 
-    .badge-green {
-      color: #8cf2cb;
-      background: rgba(16,185,129,.14);
-      border-color: rgba(16,185,129,.22);
-    }
-
-    .badge-amber {
-      color: #fcd34d;
-      background: rgba(245,158,11,.14);
-      border-color: rgba(245,158,11,.22);
-    }
-
     .badge-muted {
       color: var(--muted);
       background: rgba(137,147,168,.1);
@@ -418,7 +409,7 @@
       height: 34px;
       border: 1px solid var(--border);
       border-radius: 8px;
-      background: var(--surface-2);
+      background: var(--surface2);
       color: var(--text);
       cursor: pointer;
     }
@@ -477,7 +468,7 @@
         <div class="brand-icon">SAP</div>
         <div>
           <h1>Stock General SAP</h1>
-          <div class="subtitle">Inventario y tránsitos para contratistas</div>
+          <div class="subtitle">Inventario y transitos para contratistas</div>
         </div>
       </div>
       <div class="header-actions">
@@ -489,19 +480,19 @@
 
     <nav class="tabs" aria-label="Vistas">
       <button class="tab-btn active" id="tabStock" type="button" onclick="cambiarVista('stock')">Stock actual</button>
-      <button class="tab-btn" id="tabTransit" type="button" onclick="cambiarVista('transit')">Tránsitos próximos</button>
+      <button class="tab-btn" id="tabTransit" type="button" onclick="cambiarVista('transit')">Transitos proximos</button>
     </nav>
 
     <section class="upload" id="uploadZone">
       <input type="file" id="excelFile" accept=".xlsx,.xls" />
       <div class="upload-title" id="uploadTitle">Cargando stock.xlsx y transitos.xlsx...</div>
-      <div class="upload-sub" id="uploadSub">La página lee automáticamente los archivos publicados junto al HTML</div>
+      <div class="upload-sub" id="uploadSub">La pagina lee automaticamente los archivos publicados junto al HTML</div>
     </section>
 
     <section class="kpis" id="kpiGrid"></section>
 
     <section class="toolbar">
-      <input class="search" id="searchInput" type="search" placeholder="Buscar material, contratista, centro, almacén..." />
+      <input class="search" id="searchInput" type="search" placeholder="Buscar material, contratista, centro, almacen..." />
       <select id="filterCentro"><option value="">Todos los centros</option></select>
       <select id="filterContratista"><option value="">Todos los contratistas</option></select>
       <select id="filterUnidad"><option value="">Todas las unidades</option></select>
@@ -530,7 +521,7 @@
         </table>
       </div>
 
-      <div class="empty" id="emptyState">Todavía no hay datos cargados.</div>
+      <div class="empty" id="emptyState">Todavia no hay datos cargados.</div>
 
       <div class="pager" id="pager" style="display:none">
         <div class="subtitle" id="pageInfo"></div>
@@ -561,11 +552,11 @@
 
     const viewConfig = {
       stock: {
-        title: 'Stock actual',
         empty: 'No hay stock cargado.',
-        fileLabel: 'stock.xlsx',
         extraLabel: 'Todos los ARATOS',
         extraKey: 'arato',
+        showContratistaFilter: true,
+        showExtraFilter: true,
         kpis: [
           ['Materiales', rows => rows.length],
           ['Centros', rows => uniqueCount(rows, 'centro')],
@@ -574,9 +565,9 @@
         ],
         columns: [
           ['material', 'Material'],
-          ['descripcion', 'Descripción'],
+          ['descripcion', 'Descripcion'],
           ['centro', 'Centro'],
-          ['almacen', 'Almacén'],
+          ['almacen', 'Almacen'],
           ['lote', 'Lote'],
           ['stock', 'Stock'],
           ['unidad', 'Unidad'],
@@ -588,28 +579,26 @@
         ],
       },
       transit: {
-        title: 'Tránsitos próximos',
-        empty: 'No hay tránsitos cargados.',
-        fileLabel: 'transitos.xlsx',
-        extraLabel: 'Todos los estados',
-        extraKey: 'estado',
+        empty: 'No hay transitos cargados.',
+        extraLabel: 'Todos los almacenes',
+        extraKey: 'almacen',
+        showContratistaFilter: false,
+        showExtraFilter: true,
         kpis: [
-          ['En tránsito', rows => rows.length],
-          ['Contratistas', rows => uniqueCount(rows, 'contratista')],
+          ['En transito', rows => rows.length],
+          ['Materiales', rows => uniqueCount(rows, 'material')],
           ['Centros', rows => uniqueCount(rows, 'centro')],
-          ['Próximos 7 días', rows => proximosDias(rows, 7)],
+          ['Proximos 7 dias', rows => proximosDias(rows, 7)],
         ],
         columns: [
           ['material', 'Material'],
-          ['descripcion', 'Descripción'],
+          ['descripcion', 'Descripcion'],
           ['cantidad', 'Cantidad'],
           ['unidad', 'Unidad'],
-          ['contratista', 'Contratista'],
           ['centro', 'Centro'],
-          ['almacen', 'Almacén'],
+          ['almacen', 'Almacen'],
           ['fecha', 'Fecha estimada'],
-          ['estado', 'Estado'],
-          ['observacion', 'Observación'],
+          ['observacion', 'Observacion'],
         ],
       },
     };
@@ -636,12 +625,12 @@
       state.loadedAt = new Date();
 
       if (!state.stockRows.length && !state.transitRows.length) {
-        setUpload('No se pudieron cargar los archivos', 'Verificá que stock.xlsx y transitos.xlsx estén junto a index.html', 'error');
+        setUpload('No se pudieron cargar los archivos', 'Verifica que stock.xlsx y transitos.xlsx esten junto a index.html', 'error');
         setEstado('Archivos no disponibles');
         toast('No se pudieron leer los archivos publicados', 'red');
       } else {
         const stockText = `${state.stockRows.length.toLocaleString('es-AR')} stock`;
-        const transitText = `${state.transitRows.length.toLocaleString('es-AR')} tránsitos`;
+        const transitText = `${state.transitRows.length.toLocaleString('es-AR')} transitos`;
         setUpload('Archivos cargados correctamente', `${stockText} · ${transitText} · ${state.loadedAt.toLocaleString('es-AR')}`, 'loaded');
         setEstado('Datos actualizados');
         toast('Datos actualizados', 'green');
@@ -707,15 +696,17 @@
     }
 
     function renderHead() {
-      const columns = configActual().columns;
-      document.getElementById('tableHead').innerHTML = `<tr>${columns.map(([key, label]) => (
+      const config = configActual();
+      document.getElementById('tableHead').innerHTML = `<tr>${config.columns.map(([key, label]) => (
         `<th onclick="ordenar('${key}')">${label}</th>`
       )).join('')}</tr>`;
-      document.getElementById('emptyState').textContent = configActual().empty;
-      document.getElementById('filterExtra').options[0].textContent = configActual().extraLabel;
+      document.getElementById('emptyState').textContent = config.empty;
+      document.getElementById('filterContratista').classList.toggle('hidden', !config.showContratistaFilter);
+      document.getElementById('filterExtra').classList.toggle('hidden', !config.showExtraFilter);
+      document.getElementById('filterExtra').options[0].textContent = config.extraLabel;
       document.getElementById('searchInput').placeholder = state.view === 'stock'
-        ? 'Buscar material, contratista, centro, almacén...'
-        : 'Buscar material, contratista, centro, estado...';
+        ? 'Buscar material, contratista, centro, almacen...'
+        : 'Buscar material, centro, almacen...';
     }
 
     function renderKPIs() {
@@ -738,12 +729,13 @@
 
     function aplicarFiltros() {
       const rows = filasActuales();
+      const config = configActual();
       const text = normalizar(document.getElementById('searchInput').value);
       const centro = document.getElementById('filterCentro').value;
-      const contratista = document.getElementById('filterContratista').value;
+      const contratista = config.showContratistaFilter ? document.getElementById('filterContratista').value : '';
       const unidad = document.getElementById('filterUnidad').value;
-      const extra = document.getElementById('filterExtra').value;
-      const extraKey = configActual().extraKey;
+      const extra = config.showExtraFilter ? document.getElementById('filterExtra').value : '';
+      const extraKey = config.extraKey;
 
       state.filteredRows = rows.filter(row => {
         const haystack = normalizar(Object.values(row).join(' '));
@@ -809,13 +801,12 @@
     }
 
     function renderCell(key, row) {
-      const value = row[key] || '—';
+      const value = row[key] || '-';
       if (key === 'material') return `<td><span class="mono material">${escapeHtml(value)}</span></td>`;
       if (key === 'descripcion' || key === 'observacion') return `<td class="desc">${escapeHtml(value)}</td>`;
       if (key === 'centro') return `<td><span class="badge badge-blue">${escapeHtml(value)}</span></td>`;
       if (key === 'contratista') return `<td><span class="badge badge-violet">${escapeHtml(value)}</span></td>`;
       if (key === 'arato') return `<td><span class="badge ${row.arato ? 'badge-red' : 'badge-muted'}">${escapeHtml(row.arato || 'SIN ARATO')}</span></td>`;
-      if (key === 'estado') return `<td><span class="badge ${estadoClass(value)}">${escapeHtml(value)}</span></td>`;
       if (key === 'stock') return `<td><span class="mono ${toNumber(value) <= 0 ? 'stock-zero' : 'stock-pos'}">${escapeHtml(value)}</span></td>`;
       if (key === 'cantidad') return `<td><span class="mono stock-pos">${escapeHtml(value)}</span></td>`;
       if (key === 'valor') return `<td><span class="mono">${escapeHtml(formatValor(value))}</span></td>`;
@@ -891,11 +882,9 @@
         descripcion: get(row, ['texto breve de material', 'texto breve', 'descripcion', 'descripción']),
         cantidad: get(row, ['cantidad', 'cant', 'stock', 'libre utilizacion', 'libre utilización']),
         unidad: get(row, ['unidad medida base', 'umb', 'unidad']),
-        contratista: get(row, ['denominacion almacen', 'denominación almacén', 'contratista', 'destino']),
         centro: get(row, ['centro']),
         almacen: get(row, ['almacen', 'almacén']),
         fecha: formatFecha(get(row, ['fecha estimada', 'fecha eta', 'eta', 'fecha', 'entrega'])),
-        estado: get(row, ['estado', 'situacion', 'situación']) || estadoPorFecha(get(row, ['fecha estimada', 'fecha eta', 'eta', 'fecha', 'entrega'])),
         observacion: get(row, ['observacion', 'observación', 'comentario', 'detalle']),
       };
     }
@@ -950,25 +939,6 @@
         const date = parseFecha(row.fecha);
         return date && date >= now && date <= limit;
       }).length;
-    }
-
-    function estadoPorFecha(value) {
-      const date = parseFecha(value);
-      if (!date) return 'En tránsito';
-      const now = startOfDay(new Date());
-      const diff = Math.round((date - now) / 86400000);
-      if (diff < 0) return 'Demorado';
-      if (diff <= 7) return 'Próximo';
-      return 'En tránsito';
-    }
-
-    function estadoClass(value) {
-      const text = normalizar(value);
-      if (text.includes('demor')) return 'badge-red';
-      if (text.includes('proxim') || text.includes('entreg')) return 'badge-green';
-      if (text.includes('despach')) return 'badge-blue';
-      if (text.includes('pend')) return 'badge-amber';
-      return 'badge-violet';
     }
 
     function parseFecha(value) {
