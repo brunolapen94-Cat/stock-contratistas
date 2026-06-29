@@ -10,6 +10,7 @@
       --bg: #0a0d14;
       --surface: #111620;
       --surface-2: #161d2b;
+      --surface-3: #1b2434;
       --border: rgba(255,255,255,.08);
       --text: #e8edf5;
       --muted: #8993a8;
@@ -27,7 +28,10 @@
       margin: 0;
       min-height: 100vh;
       font-family: Arial, Helvetica, sans-serif;
-      background: var(--bg);
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,.12), transparent 36rem),
+        radial-gradient(circle at bottom right, rgba(139,92,246,.10), transparent 34rem),
+        var(--bg);
       color: var(--text);
     }
 
@@ -43,7 +47,7 @@
       justify-content: space-between;
       gap: 18px;
       flex-wrap: wrap;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
 
     .brand {
@@ -60,7 +64,7 @@
       border-radius: 14px;
       background: linear-gradient(135deg, var(--blue), var(--cyan));
       font-size: 25px;
-      box-shadow: 0 0 26px rgba(59,130,246,.3);
+      box-shadow: 0 0 26px rgba(59,130,246,.32);
     }
 
     h1 {
@@ -115,9 +119,7 @@
       cursor: pointer;
     }
 
-    .btn:hover {
-      border-color: rgba(255,255,255,.18);
-    }
+    .btn:hover { border-color: rgba(255,255,255,.18); }
 
     .btn-green {
       background: rgba(16,185,129,.14);
@@ -125,11 +127,41 @@
       color: #8cf2cb;
     }
 
+    .tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 22px;
+      padding: 6px;
+      width: fit-content;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(17,22,32,.84);
+    }
+
+    .tab-btn {
+      min-width: 148px;
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 16px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      color: white;
+      background: linear-gradient(135deg, rgba(59,130,246,.95), rgba(6,182,212,.88));
+      box-shadow: 0 8px 22px rgba(59,130,246,.20);
+    }
+
     .upload {
       position: relative;
       overflow: hidden;
       margin-bottom: 24px;
-      padding: 26px;
+      padding: 24px 26px;
       text-align: center;
       border: 2px dashed var(--border);
       border-radius: 18px;
@@ -172,10 +204,26 @@
     }
 
     .kpi {
+      position: relative;
+      overflow: hidden;
       border: 1px solid var(--border);
       border-radius: 16px;
       background: var(--surface);
       padding: 20px;
+    }
+
+    .kpi::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+    }
+
+    .kpi.transit::before {
+      background: linear-gradient(90deg, var(--amber), var(--cyan));
     }
 
     .kpi-label {
@@ -240,9 +288,7 @@
       font-size: 13px;
     }
 
-    .table-meta b {
-      color: var(--text);
-    }
+    .table-meta b { color: var(--text); }
 
     .table-scroll {
       overflow: auto;
@@ -276,9 +322,7 @@
       user-select: none;
     }
 
-    tbody tr:hover {
-      background: rgba(255,255,255,.035);
-    }
+    tbody tr:hover { background: rgba(255,255,255,.035); }
 
     .desc {
       min-width: 280px;
@@ -286,9 +330,7 @@
       color: #cbd5e1;
     }
 
-    .mono {
-      font-family: Consolas, Monaco, monospace;
-    }
+    .mono { font-family: Consolas, Monaco, monospace; }
 
     .material {
       color: #93c5fd;
@@ -330,6 +372,18 @@
       color: #fca5a5;
       background: rgba(239,68,68,.14);
       border-color: rgba(239,68,68,.22);
+    }
+
+    .badge-green {
+      color: #8cf2cb;
+      background: rgba(16,185,129,.14);
+      border-color: rgba(16,185,129,.22);
+    }
+
+    .badge-amber {
+      color: #fcd34d;
+      background: rgba(245,158,11,.14);
+      border-color: rgba(245,158,11,.22);
     }
 
     .badge-muted {
@@ -408,6 +462,8 @@
 
     @media (max-width: 760px) {
       .layout { padding: 18px; }
+      .tabs { width: 100%; }
+      .tab-btn { flex: 1; min-width: 0; }
       .kpis { grid-template-columns: repeat(2, 1fr); }
       .toolbar { flex-direction: column; }
       .search, select, .btn { width: 100%; }
@@ -418,51 +474,38 @@
   <main class="layout">
     <header class="header">
       <div class="brand">
-        <div class="brand-icon">📦</div>
+        <div class="brand-icon">SAP</div>
         <div>
           <h1>Stock General SAP</h1>
-          <div class="subtitle">Inventario actualizado para contratistas</div>
+          <div class="subtitle">Inventario y tránsitos para contratistas</div>
         </div>
       </div>
       <div class="header-actions">
-        <div class="status" id="statusText">Buscando stock.xlsx</div>
-        <button class="btn" type="button" onclick="cargarStockRemoto()">↻ Actualizar</button>
-        <button class="btn btn-green" type="button" onclick="exportarExcel()">⬇ Exportar Excel</button>
+        <div class="status" id="statusText">Cargando archivos</div>
+        <button class="btn" type="button" onclick="recargarTodo()">Actualizar</button>
+        <button class="btn btn-green" type="button" onclick="exportarExcel()">Exportar vista</button>
       </div>
     </header>
 
+    <nav class="tabs" aria-label="Vistas">
+      <button class="tab-btn active" id="tabStock" type="button" onclick="cambiarVista('stock')">Stock actual</button>
+      <button class="tab-btn" id="tabTransit" type="button" onclick="cambiarVista('transit')">Tránsitos próximos</button>
+    </nav>
+
     <section class="upload" id="uploadZone">
       <input type="file" id="excelFile" accept=".xlsx,.xls" />
-      <div style="font-size:32px">📊</div>
-      <div class="upload-title" id="uploadTitle">Cargando stock publicado...</div>
-      <div class="upload-sub" id="uploadSub">La pagina lee automaticamente el archivo stock.xlsx</div>
+      <div class="upload-title" id="uploadTitle">Cargando stock.xlsx y transitos.xlsx...</div>
+      <div class="upload-sub" id="uploadSub">La página lee automáticamente los archivos publicados junto al HTML</div>
     </section>
 
-    <section class="kpis">
-      <div class="kpi">
-        <div class="kpi-label">Materiales</div>
-        <div class="kpi-value" id="kpiMateriales">—</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Centros</div>
-        <div class="kpi-value" id="kpiCentros">—</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Contratistas</div>
-        <div class="kpi-value" id="kpiContratistas">—</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">ARATOS</div>
-        <div class="kpi-value" id="kpiAratos">—</div>
-      </div>
-    </section>
+    <section class="kpis" id="kpiGrid"></section>
 
     <section class="toolbar">
-      <input class="search" id="searchInput" type="search" placeholder="Buscar material, contratista, centro, almacen..." />
+      <input class="search" id="searchInput" type="search" placeholder="Buscar material, contratista, centro, almacén..." />
       <select id="filterCentro"><option value="">Todos los centros</option></select>
       <select id="filterContratista"><option value="">Todos los contratistas</option></select>
       <select id="filterUnidad"><option value="">Todas las unidades</option></select>
-      <select id="filterArato"><option value="">Todos los ARATOS</option></select>
+      <select id="filterExtra"><option value="">Todos</option></select>
       <button class="btn" type="button" onclick="limpiarFiltros()">Limpiar</button>
     </section>
 
@@ -482,27 +525,12 @@
 
       <div class="table-scroll">
         <table>
-          <thead>
-            <tr>
-              <th onclick="ordenar('material')">Material</th>
-              <th onclick="ordenar('descripcion')">Descripcion</th>
-              <th onclick="ordenar('centro')">Centro</th>
-              <th onclick="ordenar('almacen')">Almacen</th>
-              <th onclick="ordenar('lote')">Lote</th>
-              <th onclick="ordenar('stock')">Stock</th>
-              <th onclick="ordenar('unidad')">Unidad</th>
-              <th onclick="ordenar('contratista')">Contratista</th>
-              <th onclick="ordenar('arato')">ARATO / Especial</th>
-              <th onclick="ordenar('valor')">Valor</th>
-              <th onclick="ordenar('moneda')">Moneda</th>
-              <th>Actualizado</th>
-            </tr>
-          </thead>
+          <thead id="tableHead"></thead>
           <tbody id="tableBody"></tbody>
         </table>
       </div>
 
-      <div class="empty" id="emptyState">Todavia no hay datos cargados.</div>
+      <div class="empty" id="emptyState">Todavía no hay datos cargados.</div>
 
       <div class="pager" id="pager" style="display:none">
         <div class="subtitle" id="pageInfo"></div>
@@ -514,110 +542,333 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const REMOTE_STOCK_URL = './stock.xlsx';
+    const FILES = {
+      stock: './stock.xlsx',
+      transit: './transitos.xlsx',
+    };
     const AUTO_REFRESH_MINUTES = 5;
 
-    let allData = [];
-    let filteredData = [];
-    let currentPage = 1;
-    let sortKey = '';
-    let sortDir = 1;
+    const state = {
+      view: 'stock',
+      stockRows: [],
+      transitRows: [],
+      filteredRows: [],
+      currentPage: 1,
+      sortKey: '',
+      sortDir: 1,
+      loadedAt: null,
+    };
 
-    const uploadZone = document.getElementById('uploadZone');
-    const uploadTitle = document.getElementById('uploadTitle');
-    const uploadSub = document.getElementById('uploadSub');
+    const viewConfig = {
+      stock: {
+        title: 'Stock actual',
+        empty: 'No hay stock cargado.',
+        fileLabel: 'stock.xlsx',
+        extraLabel: 'Todos los ARATOS',
+        extraKey: 'arato',
+        kpis: [
+          ['Materiales', rows => rows.length],
+          ['Centros', rows => uniqueCount(rows, 'centro')],
+          ['Contratistas', rows => uniqueCount(rows, 'contratista')],
+          ['ARATOS', rows => uniqueCount(rows, 'arato')],
+        ],
+        columns: [
+          ['material', 'Material'],
+          ['descripcion', 'Descripción'],
+          ['centro', 'Centro'],
+          ['almacen', 'Almacén'],
+          ['lote', 'Lote'],
+          ['stock', 'Stock'],
+          ['unidad', 'Unidad'],
+          ['contratista', 'Contratista'],
+          ['arato', 'ARATO / Especial'],
+          ['valor', 'Valor'],
+          ['moneda', 'Moneda'],
+          ['actualizado', 'Actualizado'],
+        ],
+      },
+      transit: {
+        title: 'Tránsitos próximos',
+        empty: 'No hay tránsitos cargados.',
+        fileLabel: 'transitos.xlsx',
+        extraLabel: 'Todos los estados',
+        extraKey: 'estado',
+        kpis: [
+          ['En tránsito', rows => rows.length],
+          ['Contratistas', rows => uniqueCount(rows, 'contratista')],
+          ['Centros', rows => uniqueCount(rows, 'centro')],
+          ['Próximos 7 días', rows => proximosDias(rows, 7)],
+        ],
+        columns: [
+          ['material', 'Material'],
+          ['descripcion', 'Descripción'],
+          ['cantidad', 'Cantidad'],
+          ['unidad', 'Unidad'],
+          ['contratista', 'Contratista'],
+          ['centro', 'Centro'],
+          ['almacen', 'Almacén'],
+          ['fecha', 'Fecha estimada'],
+          ['estado', 'Estado'],
+          ['observacion', 'Observación'],
+        ],
+      },
+    };
 
     document.getElementById('excelFile').addEventListener('change', event => {
       const file = event.target.files[0];
-      if (file) procesarArchivoLocal(file);
-    });
-
-    uploadZone.addEventListener('dragover', event => {
-      event.preventDefault();
-      uploadZone.style.borderColor = 'rgba(59,130,246,.8)';
-    });
-
-    uploadZone.addEventListener('dragleave', () => {
-      uploadZone.style.borderColor = '';
-    });
-
-    uploadZone.addEventListener('drop', event => {
-      event.preventDefault();
-      uploadZone.style.borderColor = '';
-      const file = event.dataTransfer.files[0];
-      if (file) procesarArchivoLocal(file);
+      if (file) cargarArchivoManual(file);
     });
 
     document.getElementById('searchInput').addEventListener('input', aplicarFiltros);
-    ['filterCentro', 'filterContratista', 'filterUnidad', 'filterArato'].forEach(id => {
+    ['filterCentro', 'filterContratista', 'filterUnidad', 'filterExtra'].forEach(id => {
       document.getElementById(id).addEventListener('change', aplicarFiltros);
     });
 
-    function procesarArchivoLocal(file) {
+    async function recargarTodo() {
+      setEstado('Actualizando archivos');
+      setUpload('Cargando archivos publicados...', 'Leyendo stock.xlsx y transitos.xlsx', 'loading');
+
+      const stock = await cargarExcelRemoto(FILES.stock, 'stock.xlsx', false);
+      const transit = await cargarExcelRemoto(FILES.transit, 'transitos.xlsx', true);
+
+      state.stockRows = stock.map(mapStockRow);
+      state.transitRows = transit.map(mapTransitRow);
+      state.loadedAt = new Date();
+
+      if (!state.stockRows.length && !state.transitRows.length) {
+        setUpload('No se pudieron cargar los archivos', 'Verificá que stock.xlsx y transitos.xlsx estén junto a index.html', 'error');
+        setEstado('Archivos no disponibles');
+        toast('No se pudieron leer los archivos publicados', 'red');
+      } else {
+        const stockText = `${state.stockRows.length.toLocaleString('es-AR')} stock`;
+        const transitText = `${state.transitRows.length.toLocaleString('es-AR')} tránsitos`;
+        setUpload('Archivos cargados correctamente', `${stockText} · ${transitText} · ${state.loadedAt.toLocaleString('es-AR')}`, 'loaded');
+        setEstado('Datos actualizados');
+        toast('Datos actualizados', 'green');
+      }
+
+      prepararVista();
+    }
+
+    async function cargarExcelRemoto(url, label, optional) {
+      try {
+        const response = await fetch(`${url}?v=${Date.now()}`, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const buffer = await response.arrayBuffer();
+        return leerExcel(buffer);
+      } catch (error) {
+        if (!optional) toast(`No se pudo leer ${label}`, 'red');
+        return [];
+      }
+    }
+
+    function cargarArchivoManual(file) {
       const reader = new FileReader();
-      reader.onload = event => cargarDatosExcel(event.target.result, file.name);
+      reader.onload = event => {
+        const rows = leerExcel(event.target.result);
+        if (state.view === 'stock') state.stockRows = rows.map(mapStockRow);
+        else state.transitRows = rows.map(mapTransitRow);
+        state.loadedAt = new Date();
+        setUpload(`${file.name} cargado manualmente`, `${rows.length.toLocaleString('es-AR')} registros`, 'loaded');
+        prepararVista();
+      };
       reader.readAsArrayBuffer(file);
     }
 
-    async function cargarStockRemoto() {
-      setEstado('Buscando stock.xlsx');
-      uploadZone.classList.remove('error');
-      uploadZone.classList.add('loaded');
-      uploadTitle.textContent = 'Actualizando stock publicado...';
-      uploadSub.textContent = 'Leyendo stock.xlsx desde la web';
-
-      try {
-        const url = `${REMOTE_STOCK_URL}?v=${Date.now()}`;
-        const response = await fetch(url, { cache: 'no-store' });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const buffer = await response.arrayBuffer();
-        cargarDatosExcel(buffer, 'stock.xlsx');
-      } catch (error) {
-        uploadZone.classList.remove('loaded');
-        uploadZone.classList.add('error');
-        uploadTitle.textContent = 'No se pudo cargar stock.xlsx';
-        uploadSub.textContent = 'Verifica que stock.xlsx este subido junto a index.html en GitHub';
-        setEstado('Stock no disponible');
-        toast('No se pudo leer stock.xlsx', 'red');
-      }
-    }
-
-    function cargarDatosExcel(buffer, origen) {
+    function leerExcel(buffer) {
       const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      allData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+      return XLSX.utils.sheet_to_json(sheet, { defval: '' });
+    }
 
-      uploadZone.classList.remove('error');
-      uploadZone.classList.add('loaded');
-      uploadTitle.textContent = `✅ ${origen} cargado`;
-      uploadSub.textContent = `${allData.length.toLocaleString('es-AR')} registros encontrados · ${new Date().toLocaleString('es-AR')}`;
-      setEstado('Stock actualizado');
+    function cambiarVista(view) {
+      state.view = view;
+      state.sortKey = '';
+      state.sortDir = 1;
+      state.currentPage = 1;
+      document.getElementById('tabStock').classList.toggle('active', view === 'stock');
+      document.getElementById('tabTransit').classList.toggle('active', view === 'transit');
+      prepararVista();
+    }
 
+    function prepararVista() {
+      renderHead();
+      renderKPIs();
       generarFiltros();
-      actualizarKPIs();
       aplicarFiltros();
-      toast(`Stock actualizado: ${allData.length.toLocaleString('es-AR')} registros`, 'green');
     }
 
-    function normalizar(texto) {
-      return String(texto ?? '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .trim();
+    function filasActuales() {
+      return state.view === 'stock' ? state.stockRows : state.transitRows;
     }
 
-    function get(row, names) {
-      const keys = Object.keys(row);
-      for (const name of names) {
-        const target = normalizar(name);
-        const key = keys.find(k => normalizar(k).includes(target));
-        if (key !== undefined) return row[key];
+    function configActual() {
+      return viewConfig[state.view];
+    }
+
+    function renderHead() {
+      const columns = configActual().columns;
+      document.getElementById('tableHead').innerHTML = `<tr>${columns.map(([key, label]) => (
+        `<th onclick="ordenar('${key}')">${label}</th>`
+      )).join('')}</tr>`;
+      document.getElementById('emptyState').textContent = configActual().empty;
+      document.getElementById('filterExtra').options[0].textContent = configActual().extraLabel;
+      document.getElementById('searchInput').placeholder = state.view === 'stock'
+        ? 'Buscar material, contratista, centro, almacén...'
+        : 'Buscar material, contratista, centro, estado...';
+    }
+
+    function renderKPIs() {
+      const rows = filasActuales();
+      document.getElementById('kpiGrid').innerHTML = configActual().kpis.map(([label, calc]) => (
+        `<div class="kpi ${state.view === 'transit' ? 'transit' : ''}">
+          <div class="kpi-label">${escapeHtml(label)}</div>
+          <div class="kpi-value">${Number(calc(rows) || 0).toLocaleString('es-AR')}</div>
+        </div>`
+      )).join('');
+    }
+
+    function generarFiltros() {
+      const rows = filasActuales();
+      llenarSelect('filterCentro', valoresUnicos(rows, 'centro'), 'Todos los centros');
+      llenarSelect('filterContratista', valoresUnicos(rows, 'contratista'), 'Todos los contratistas');
+      llenarSelect('filterUnidad', valoresUnicos(rows, 'unidad'), 'Todas las unidades');
+      llenarSelect('filterExtra', valoresUnicos(rows, configActual().extraKey), configActual().extraLabel);
+    }
+
+    function aplicarFiltros() {
+      const rows = filasActuales();
+      const text = normalizar(document.getElementById('searchInput').value);
+      const centro = document.getElementById('filterCentro').value;
+      const contratista = document.getElementById('filterContratista').value;
+      const unidad = document.getElementById('filterUnidad').value;
+      const extra = document.getElementById('filterExtra').value;
+      const extraKey = configActual().extraKey;
+
+      state.filteredRows = rows.filter(row => {
+        const haystack = normalizar(Object.values(row).join(' '));
+        return (!text || haystack.includes(text))
+          && (!centro || String(row.centro) === centro)
+          && (!contratista || String(row.contratista) === contratista)
+          && (!unidad || String(row.unidad) === unidad)
+          && (!extra || String(row[extraKey]) === extra);
+      });
+
+      if (state.sortKey) ordenarDatos();
+      state.currentPage = 1;
+      renderTabla();
+    }
+
+    function ordenar(key) {
+      if (state.sortKey === key) state.sortDir *= -1;
+      else {
+        state.sortKey = key;
+        state.sortDir = 1;
       }
-      return '';
+      ordenarDatos();
+      state.currentPage = 1;
+      renderTabla();
     }
 
-    function getRowData(row) {
+    function ordenarDatos() {
+      state.filteredRows.sort((a, b) => {
+        const va = a[state.sortKey] ?? '';
+        const vb = b[state.sortKey] ?? '';
+        return String(va).localeCompare(String(vb), 'es', { numeric: true }) * state.sortDir;
+      });
+    }
+
+    function renderTabla() {
+      const tbody = document.getElementById('tableBody');
+      const empty = document.getElementById('emptyState');
+      const pager = document.getElementById('pager');
+      const rowsPerPage = Number(document.getElementById('rowsPerPage').value);
+      const total = state.filteredRows.length;
+      const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));
+
+      document.getElementById('countVisible').textContent = total.toLocaleString('es-AR');
+      document.getElementById('countTotal').textContent = filasActuales().length.toLocaleString('es-AR');
+
+      if (state.currentPage > totalPages) state.currentPage = totalPages;
+
+      if (!total) {
+        tbody.innerHTML = '';
+        empty.style.display = 'block';
+        pager.style.display = 'none';
+        return;
+      }
+
+      empty.style.display = 'none';
+      pager.style.display = 'flex';
+
+      const start = (state.currentPage - 1) * rowsPerPage;
+      const rows = state.filteredRows.slice(start, start + rowsPerPage);
+      tbody.innerHTML = rows.map(row => `<tr>${configActual().columns.map(([key]) => renderCell(key, row)).join('')}</tr>`).join('');
+
+      renderPaginacion(total, rowsPerPage, totalPages);
+    }
+
+    function renderCell(key, row) {
+      const value = row[key] || '—';
+      if (key === 'material') return `<td><span class="mono material">${escapeHtml(value)}</span></td>`;
+      if (key === 'descripcion' || key === 'observacion') return `<td class="desc">${escapeHtml(value)}</td>`;
+      if (key === 'centro') return `<td><span class="badge badge-blue">${escapeHtml(value)}</span></td>`;
+      if (key === 'contratista') return `<td><span class="badge badge-violet">${escapeHtml(value)}</span></td>`;
+      if (key === 'arato') return `<td><span class="badge ${row.arato ? 'badge-red' : 'badge-muted'}">${escapeHtml(row.arato || 'SIN ARATO')}</span></td>`;
+      if (key === 'estado') return `<td><span class="badge ${estadoClass(value)}">${escapeHtml(value)}</span></td>`;
+      if (key === 'stock') return `<td><span class="mono ${toNumber(value) <= 0 ? 'stock-zero' : 'stock-pos'}">${escapeHtml(value)}</span></td>`;
+      if (key === 'cantidad') return `<td><span class="mono stock-pos">${escapeHtml(value)}</span></td>`;
+      if (key === 'valor') return `<td><span class="mono">${escapeHtml(formatValor(value))}</span></td>`;
+      return `<td>${escapeHtml(value)}</td>`;
+    }
+
+    function renderPaginacion(total, rowsPerPage, totalPages) {
+      const start = (state.currentPage - 1) * rowsPerPage + 1;
+      const end = Math.min(state.currentPage * rowsPerPage, total);
+      document.getElementById('pageInfo').textContent = `${start.toLocaleString('es-AR')}-${end.toLocaleString('es-AR')} de ${total.toLocaleString('es-AR')}`;
+
+      const controls = document.getElementById('pageControls');
+      const buttons = [];
+      buttons.push(`<button class="page-btn" onclick="cambiarPagina(${state.currentPage - 1})" ${state.currentPage === 1 ? 'disabled' : ''}>‹</button>`);
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || Math.abs(i - state.currentPage) <= 1) {
+          buttons.push(`<button class="page-btn ${i === state.currentPage ? 'active' : ''}" onclick="cambiarPagina(${i})">${i}</button>`);
+        } else if (Math.abs(i - state.currentPage) === 2) {
+          buttons.push(`<span class="subtitle" style="padding:8px 2px">...</span>`);
+        }
+      }
+      buttons.push(`<button class="page-btn" onclick="cambiarPagina(${state.currentPage + 1})" ${state.currentPage === totalPages ? 'disabled' : ''}>›</button>`);
+      controls.innerHTML = buttons.join('');
+    }
+
+    function cambiarPagina(page) {
+      const rowsPerPage = Number(document.getElementById('rowsPerPage').value);
+      const totalPages = Math.max(1, Math.ceil(state.filteredRows.length / rowsPerPage));
+      if (page < 1 || page > totalPages) return;
+      state.currentPage = page;
+      renderTabla();
+    }
+
+    function limpiarFiltros() {
+      document.getElementById('searchInput').value = '';
+      ['filterCentro', 'filterContratista', 'filterUnidad', 'filterExtra'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      aplicarFiltros();
+    }
+
+    function exportarExcel() {
+      if (!state.filteredRows.length) {
+        toast('No hay datos para exportar', 'red');
+        return;
+      }
+      const worksheet = XLSX.utils.json_to_sheet(state.filteredRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, state.view === 'stock' ? 'Stock' : 'Transitos');
+      XLSX.writeFile(workbook, `${state.view === 'stock' ? 'stock' : 'transitos'}_vista_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    function mapStockRow(row) {
       return {
         material: get(row, ['material']),
         descripcion: get(row, ['texto breve de material', 'texto breve', 'descripcion', 'descripción']),
@@ -630,19 +881,46 @@
         arato: get(row, ['numero de stock especial', 'número de stock especial', 'stock especial', 'arato', 'especial']),
         valor: get(row, ['valor libre util', 'valor libre', 'valor']),
         moneda: get(row, ['moneda']),
+        actualizado: new Date().toLocaleDateString('es-AR'),
       };
     }
 
-    function generarFiltros() {
-      const rows = allData.map(getRowData);
-      llenarSelect('filterCentro', valoresUnicos(rows, 'centro'), 'Todos los centros');
-      llenarSelect('filterContratista', valoresUnicos(rows, 'contratista'), 'Todos los contratistas');
-      llenarSelect('filterUnidad', valoresUnicos(rows, 'unidad'), 'Todas las unidades');
-      llenarSelect('filterArato', valoresUnicos(rows, 'arato'), 'Todos los ARATOS');
+    function mapTransitRow(row) {
+      return {
+        material: get(row, ['material', 'codigo material', 'código material']),
+        descripcion: get(row, ['texto breve de material', 'texto breve', 'descripcion', 'descripción']),
+        cantidad: get(row, ['cantidad', 'cant', 'stock', 'libre utilizacion', 'libre utilización']),
+        unidad: get(row, ['unidad medida base', 'umb', 'unidad']),
+        contratista: get(row, ['denominacion almacen', 'denominación almacén', 'contratista', 'destino']),
+        centro: get(row, ['centro']),
+        almacen: get(row, ['almacen', 'almacén']),
+        fecha: formatFecha(get(row, ['fecha estimada', 'fecha eta', 'eta', 'fecha', 'entrega'])),
+        estado: get(row, ['estado', 'situacion', 'situación']) || estadoPorFecha(get(row, ['fecha estimada', 'fecha eta', 'eta', 'fecha', 'entrega'])),
+        observacion: get(row, ['observacion', 'observación', 'comentario', 'detalle']),
+      };
+    }
+
+    function get(row, names) {
+      const keys = Object.keys(row);
+      for (const name of names) {
+        const target = normalizar(name);
+        const key = keys.find(k => normalizar(k).includes(target));
+        if (key !== undefined) return row[key];
+      }
+      return '';
+    }
+
+    function normalizar(texto) {
+      return String(texto ?? '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
     }
 
     function valoresUnicos(rows, key) {
-      return [...new Set(rows.map(row => row[key]).filter(Boolean).map(String))].sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+      return [...new Set(rows.map(row => row[key]).filter(Boolean).map(String))]
+        .sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
     }
 
     function llenarSelect(id, valores, placeholder) {
@@ -660,162 +938,64 @@
       });
     }
 
-    function actualizarKPIs() {
-      const rows = allData.map(getRowData);
-      document.getElementById('kpiMateriales').textContent = allData.length.toLocaleString('es-AR');
-      document.getElementById('kpiCentros').textContent = new Set(rows.map(r => r.centro).filter(Boolean)).size.toLocaleString('es-AR');
-      document.getElementById('kpiContratistas').textContent = new Set(rows.map(r => r.contratista).filter(Boolean)).size.toLocaleString('es-AR');
-      document.getElementById('kpiAratos').textContent = new Set(rows.map(r => r.arato).filter(Boolean)).size.toLocaleString('es-AR');
+    function uniqueCount(rows, key) {
+      return new Set(rows.map(row => row[key]).filter(Boolean)).size;
     }
 
-    function aplicarFiltros() {
-      const text = normalizar(document.getElementById('searchInput').value);
-      const centro = document.getElementById('filterCentro').value;
-      const contratista = document.getElementById('filterContratista').value;
-      const unidad = document.getElementById('filterUnidad').value;
-      const arato = document.getElementById('filterArato').value;
-
-      filteredData = allData.map(getRowData).filter(row => {
-        const haystack = normalizar(Object.values(row).join(' '));
-        return (!text || haystack.includes(text))
-          && (!centro || String(row.centro) === centro)
-          && (!contratista || String(row.contratista) === contratista)
-          && (!unidad || String(row.unidad) === unidad)
-          && (!arato || String(row.arato) === arato);
-      });
-
-      if (sortKey) ordenarDatos();
-      currentPage = 1;
-      renderTabla();
+    function proximosDias(rows, days) {
+      const now = startOfDay(new Date());
+      const limit = new Date(now);
+      limit.setDate(limit.getDate() + days);
+      return rows.filter(row => {
+        const date = parseFecha(row.fecha);
+        return date && date >= now && date <= limit;
+      }).length;
     }
 
-    function ordenar(key) {
-      if (sortKey === key) sortDir *= -1;
-      else {
-        sortKey = key;
-        sortDir = 1;
+    function estadoPorFecha(value) {
+      const date = parseFecha(value);
+      if (!date) return 'En tránsito';
+      const now = startOfDay(new Date());
+      const diff = Math.round((date - now) / 86400000);
+      if (diff < 0) return 'Demorado';
+      if (diff <= 7) return 'Próximo';
+      return 'En tránsito';
+    }
+
+    function estadoClass(value) {
+      const text = normalizar(value);
+      if (text.includes('demor')) return 'badge-red';
+      if (text.includes('proxim') || text.includes('entreg')) return 'badge-green';
+      if (text.includes('despach')) return 'badge-blue';
+      if (text.includes('pend')) return 'badge-amber';
+      return 'badge-violet';
+    }
+
+    function parseFecha(value) {
+      if (!value) return null;
+      if (value instanceof Date) return startOfDay(value);
+      if (typeof value === 'number') {
+        const parsed = XLSX.SSF.parse_date_code(value);
+        if (!parsed) return null;
+        return startOfDay(new Date(parsed.y, parsed.m - 1, parsed.d));
       }
-      ordenarDatos();
-      currentPage = 1;
-      renderTabla();
-    }
-
-    function ordenarDatos() {
-      filteredData.sort((a, b) => {
-        const va = a[sortKey] ?? '';
-        const vb = b[sortKey] ?? '';
-        return String(va).localeCompare(String(vb), 'es', { numeric: true }) * sortDir;
-      });
-    }
-
-    function renderTabla() {
-      const tbody = document.getElementById('tableBody');
-      const empty = document.getElementById('emptyState');
-      const pager = document.getElementById('pager');
-      const rowsPerPage = Number(document.getElementById('rowsPerPage').value);
-      const total = filteredData.length;
-      const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));
-
-      document.getElementById('countVisible').textContent = total.toLocaleString('es-AR');
-      document.getElementById('countTotal').textContent = allData.length.toLocaleString('es-AR');
-
-      if (currentPage > totalPages) currentPage = totalPages;
-
-      if (!total) {
-        tbody.innerHTML = '';
-        empty.style.display = 'block';
-        pager.style.display = 'none';
-        return;
+      const text = String(value).trim();
+      const parts = text.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+      if (parts) {
+        const year = Number(parts[3].length === 2 ? `20${parts[3]}` : parts[3]);
+        return startOfDay(new Date(year, Number(parts[2]) - 1, Number(parts[1])));
       }
-
-      empty.style.display = 'none';
-      pager.style.display = 'flex';
-
-      const start = (currentPage - 1) * rowsPerPage;
-      const rows = filteredData.slice(start, start + rowsPerPage);
-      const fecha = new Date().toLocaleDateString('es-AR');
-
-      tbody.innerHTML = rows.map(row => {
-        const stockNum = toNumber(row.stock);
-        const valor = row.valor === '' ? '—' : formatValor(row.valor);
-        return `<tr>
-          <td><span class="mono material">${escapeHtml(row.material)}</span></td>
-          <td class="desc">${escapeHtml(row.descripcion)}</td>
-          <td><span class="badge badge-blue">${escapeHtml(row.centro)}</span></td>
-          <td>${escapeHtml(row.almacen)}</td>
-          <td><span class="mono">${escapeHtml(row.lote || '—')}</span></td>
-          <td><span class="mono ${stockNum <= 0 ? 'stock-zero' : 'stock-pos'}">${escapeHtml(row.stock)}</span></td>
-          <td>${escapeHtml(row.unidad)}</td>
-          <td><span class="badge badge-violet">${escapeHtml(row.contratista || '—')}</span></td>
-          <td><span class="badge ${row.arato ? 'badge-red' : 'badge-muted'}">${escapeHtml(row.arato || 'SIN ARATO')}</span></td>
-          <td><span class="mono">${escapeHtml(valor)}</span></td>
-          <td>${escapeHtml(row.moneda || '—')}</td>
-          <td><span class="mono">${escapeHtml(fecha)}</span></td>
-        </tr>`;
-      }).join('');
-
-      renderPaginacion(total, rowsPerPage, totalPages);
+      const date = new Date(text);
+      return Number.isNaN(date.getTime()) ? null : startOfDay(date);
     }
 
-    function renderPaginacion(total, rowsPerPage, totalPages) {
-      const start = (currentPage - 1) * rowsPerPage + 1;
-      const end = Math.min(currentPage * rowsPerPage, total);
-      document.getElementById('pageInfo').textContent = `${start.toLocaleString('es-AR')}–${end.toLocaleString('es-AR')} de ${total.toLocaleString('es-AR')}`;
-
-      const controls = document.getElementById('pageControls');
-      const buttons = [];
-      buttons.push(`<button class="page-btn" onclick="cambiarPagina(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹</button>`);
-      for (let i = 1; i <= totalPages; i++) {
-        if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
-          buttons.push(`<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="cambiarPagina(${i})">${i}</button>`);
-        } else if (Math.abs(i - currentPage) === 2) {
-          buttons.push(`<span class="subtitle" style="padding:8px 2px">...</span>`);
-        }
-      }
-      buttons.push(`<button class="page-btn" onclick="cambiarPagina(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>›</button>`);
-      controls.innerHTML = buttons.join('');
+    function formatFecha(value) {
+      const date = parseFecha(value);
+      return date ? date.toLocaleDateString('es-AR') : value;
     }
 
-    function cambiarPagina(page) {
-      const rowsPerPage = Number(document.getElementById('rowsPerPage').value);
-      const totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
-      if (page < 1 || page > totalPages) return;
-      currentPage = page;
-      renderTabla();
-    }
-
-    function limpiarFiltros() {
-      document.getElementById('searchInput').value = '';
-      ['filterCentro', 'filterContratista', 'filterUnidad', 'filterArato'].forEach(id => {
-        document.getElementById(id).value = '';
-      });
-      aplicarFiltros();
-    }
-
-    function exportarExcel() {
-      if (!filteredData.length) {
-        toast('No hay datos para exportar', 'red');
-        return;
-      }
-
-      const rows = filteredData.map(row => ({
-        Material: row.material,
-        Descripcion: row.descripcion,
-        Centro: row.centro,
-        Almacen: row.almacen,
-        Lote: row.lote,
-        Stock: row.stock,
-        Unidad: row.unidad,
-        Contratista: row.contratista,
-        Arato: row.arato || 'SIN ARATO',
-        Valor: row.valor,
-        Moneda: row.moneda,
-      }));
-
-      const worksheet = XLSX.utils.json_to_sheet(rows);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Stock');
-      XLSX.writeFile(workbook, `stock_sap_${new Date().toISOString().slice(0,10)}.xlsx`);
+    function startOfDay(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
     }
 
     function toNumber(value) {
@@ -846,6 +1026,14 @@
       document.getElementById('statusText').textContent = text;
     }
 
+    function setUpload(title, sub, mode) {
+      const zone = document.getElementById('uploadZone');
+      zone.classList.toggle('loaded', mode === 'loaded' || mode === 'loading');
+      zone.classList.toggle('error', mode === 'error');
+      document.getElementById('uploadTitle').textContent = title;
+      document.getElementById('uploadSub').textContent = sub;
+    }
+
     function toast(message, type = 'green') {
       const el = document.getElementById('toast');
       el.textContent = message;
@@ -854,9 +1042,11 @@
       setTimeout(() => el.classList.remove('show'), 3000);
     }
 
+    renderHead();
+    renderKPIs();
     renderTabla();
-    cargarStockRemoto();
-    setInterval(cargarStockRemoto, AUTO_REFRESH_MINUTES * 60 * 1000);
+    recargarTodo();
+    setInterval(recargarTodo, AUTO_REFRESH_MINUTES * 60 * 1000);
   </script>
 </body>
 </html>
